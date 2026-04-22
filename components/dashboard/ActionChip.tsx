@@ -5,11 +5,12 @@ import { Text, TouchableOpacity, View } from "react-native";
 type ActionChipProps = {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
+  onPress?: () => void;
 };
 
-export function ActionChip({ icon, label }: ActionChipProps) {
+export function ActionChip({ icon, label, onPress }: ActionChipProps) {
   return (
-    <TouchableOpacity className="w-[23%] items-center">
+    <TouchableOpacity onPress={onPress} className="w-[23%] items-center">
       <View className="mb-2 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
         <Ionicons name={icon} size={20} color="#1f2aba" />
       </View>

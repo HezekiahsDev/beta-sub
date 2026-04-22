@@ -1,0 +1,11 @@
+import { Stack } from "expo-router";
+
+export default function UpgradeLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
+  );
+}

@@ -83,13 +83,13 @@ export default function TabLayout() {
           paddingBottom: 8,
           paddingTop: 18,
           paddingLeft: 8,
-          paddingRight: 12,
-          marginRight: 31,
+          paddingRight: 0,
+          marginRight: 72,
           backgroundColor: tabBarBackground,
           // Left edge flush with screen, right edge rounded to match screenshot
           borderTopLeftRadius: 0,
-          borderTopRightRadius: 36,
-          borderBottomRightRadius: 36,
+          borderTopRightRadius: 72,
+          borderBottomRightRadius: 72,
           overflow: "visible",
           shadowColor: "#0f172a",
           shadowOffset: { width: 0, height: 8 },
@@ -98,7 +98,7 @@ export default function TabLayout() {
         },
         headerShown: false,
         sceneStyle: {
-          backgroundColor: colorScheme === "dark" ? "#020617" : "#f3f4f8",
+          backgroundColor: "#ffffff",
         },
       }}
     >

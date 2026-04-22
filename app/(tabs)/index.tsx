@@ -1,6 +1,6 @@
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,28 +13,37 @@ import { TransactionRow } from "@/components/dashboard/TransactionRow";
 const quickActions: Array<{
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
+  route?: any;
 }> = [
   { icon: "rocket-outline", label: "Bonus" },
   { icon: "add", label: "Add Money" },
-  { icon: "tennisball-outline", label: "Spin & Win" },
-  { icon: "wallet-outline", label: "Wallet to Bank" },
+  { icon: "tennisball-outline", label: "Spin & Win", route: "/(spin)" },
+  { icon: "wallet-outline", label: "Wallet to Bank", route: "/(withdrawal)" },
 ];
 
 const services: Array<{
   icon: React.ComponentProps<typeof Ionicons>["name"];
   label: string;
+  route?: any;
 }> = [
-  { icon: "call-outline", label: "Airtime" },
-  { icon: "phone-portrait-outline", label: "Data" },
-  { icon: "tv-outline", label: "Cable" },
-  { icon: "happy-outline", label: "Smile" },
-  { icon: "flash-outline", label: "Electricity" },
-  { icon: "school-outline", label: "Exams" },
-  { icon: "arrow-up-outline", label: "Upgrade" },
-  { icon: "storefront-outline", label: "Market" },
+  { icon: "call-outline", label: "Airtime", route: "/(airtime)" },
+  { icon: "phone-portrait-outline", label: "Data", route: "/(data)" },
+  { icon: "tv-outline", label: "Cable", route: "/(cable)" },
+  { icon: "happy-outline", label: "Smile", route: "/(smile)" },
+  { icon: "flash-outline", label: "Electricity", route: "/(electricity)" },
+  { icon: "school-outline", label: "Exams", route: "/(exams)" },
+  {
+    icon: "chatbubble-ellipses-outline",
+    label: "Bulk SMS",
+    route: "/(bulk-sms)",
+  },
+  { icon: "arrow-up-outline", label: "Upgrade", route: "/(upgrade)" },
+  { icon: "storefront-outline", label: "Market", route: "/(market)" },
 ];
 
 export default function TabOneScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView
       className="flex-1 bg-brand-700"
@@ -50,7 +59,9 @@ export default function TabOneScreen() {
               </View>
               <View>
                 <Text className="text-xs text-brand-200">Welcome Back!</Text>
-                <Text className="text-2xl font-black text-white">Jiddah</Text>
+                <Text className="text-2xl font-black text-white">
+                  Hezekiahs
+                </Text>
               </View>
             </View>
 
@@ -90,7 +101,7 @@ export default function TabOneScreen() {
             <View className="items-end mt-5">
               <View className="px-2 py-1 mb-2 border rounded-lg border-white/30 bg-white/10">
                 <Text className="font-semibold text-right text-white">
-                  Palmpay Bank
+                  Palmpay
                 </Text>
                 <Text className="text-xl font-bold leading-7 text-right text-white">
                   6623049721
@@ -112,14 +123,15 @@ export default function TabOneScreen() {
                 key={item.label}
                 icon={item.icon}
                 label={item.label}
+                onPress={() => item.route && router.push(item.route)}
               />
             ))}
           </View>
 
           <View className="mb-6 overflow-hidden rounded-2xl bg-brand-700">
             <View className="px-4 py-4">
-              <Text className="text-3xl font-black text-white">@ BETASUB</Text>
-              <Text className="mt-1 text-lg font-extrabold text-white uppercase">
+              <Text className="text-3xl font-bold text-white">@ BETASUB</Text>
+              <Text className="mt-1 text-lg font-black text-white uppercase">
                 We offer affordable smile bundles & instant top-up
               </Text>
               <Text className="mt-2 text-sm text-brand-100">
@@ -138,6 +150,7 @@ export default function TabOneScreen() {
                   key={item.label}
                   icon={item.icon}
                   label={item.label}
+                  onPress={() => item.route && router.push(item.route)}
                 />
               ))}
             </View>

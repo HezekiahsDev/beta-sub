@@ -11,6 +11,7 @@ type AuthInputProps = {
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   rightAdornment?: React.ReactNode;
   error?: string;
+  maxLength?: number;
 };
 
 export function AuthInput({
@@ -23,6 +24,7 @@ export function AuthInput({
   autoCapitalize = "none",
   rightAdornment,
   error,
+  maxLength,
 }: AuthInputProps) {
   return (
     <View className="mb-4">
@@ -36,6 +38,7 @@ export function AuthInput({
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          maxLength={maxLength}
           className="flex-1 text-xl text-slate-900"
         />
         {rightAdornment}

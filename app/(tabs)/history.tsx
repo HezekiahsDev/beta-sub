@@ -1,82 +1,202 @@
-import React from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, Text, View } from "react-native";
+import {
+  SectionList,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SectionHeader } from "../../components/dashboard/SectionHeader";
+import { TransactionRow } from "../../components/dashboard/TransactionRow";
+import ReceiptModal from "../history/ReceiptModal";
 
-const historyItems = [
-  {
-    title: "Airtime top-up",
-    amount: "N7,000",
-    date: "Today, 2:54AM",
-    status: "Successful",
-  },
-  {
-    title: "DSTV subscription",
-    amount: "N22,000",
-    date: "Yesterday, 10:22PM",
-    status: "Pending",
-  },
-  {
-    title: "Electricity token",
-    amount: "N15,000",
-    date: "Yesterday, 8:10PM",
-    status: "Successful",
-  },
-  {
-    title: "Smile data",
-    amount: "N5,000",
-    date: "Mon, 4:18PM",
-    status: "Successful",
-  },
-];
+type Tx = {
+  id: string;
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  title: string;
+  amount: string;
+  date: string; // ISO
+  status: "Successful" | "Pending" | "Failed";
+};
+
+const ALL_ITEMS: Tx[] = Array.from({ length: 36 }).map((_, i) => {
+  const daysAgo = Math.floor(i / 6); // 6 items per day bucket
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  date.setHours(9 + (i % 6), 15);
+  return {
+    id: `tx-${i}`,
+    icon: i % 3 === 0 ? "call" : i % 3 === 1 ? "logo-usd" : "flash",
+    title:
+      i % 3 === 0
+        ? "Airtime top-up"
+        : i % 3 === 1
+          ? "DSTV subscription"
+          : "Electricity token",
+    amount: `N${(Math.floor(Math.random() * 90) + 10) * 100}`,
+    date: date.toISOString(),
+    status: i % 5 === 0 ? "Pending" : "Successful",
+  } as Tx;
+});
+
+function getDateLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const diff = Math.floor((+today - +d) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function groupByDate(items: Tx[]) {
+  const map = new Map<string, Tx[]>();
+  items.forEach((it) => {
+    const key = getDateLabel(it.date);
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(it);
+  });
+  const sections = Array.from(map.entries()).map(([title, data]) => ({
+    title,
+    data,
+  }));
+  return sections;
+}
 
 export default function HistoryScreen() {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<
+    "All" | "Successful" | "Failed" | "Pending"
+  >("All");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState<Tx[]>(ALL_ITEMS.slice(0, 12));
+  const [selectedTx, setSelectedTx] = useState<Tx | null>(null);
+
+  const filters = ["All", "Successful", "Failed", "Pending"] as const;
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((it) => {
+      if (filter !== "All" && it.status !== filter) return false;
+      if (!q) return true;
+      return (it.title + it.amount).toLowerCase().includes(q);
+    });
+  }, [items, filter, query]);
+
+  const sections = useMemo(() => groupByDate(filtered), [filtered]);
+
+  const loadMore = useCallback(() => {
+    if (loading) return;
+    setLoading(true);
+    setTimeout(() => {
+      const next = ALL_ITEMS.slice(
+        0,
+        Math.min(ALL_ITEMS.length, items.length + 8),
+      );
+      setItems(next);
+      setPage((p) => p + 1);
+      setLoading(false);
+    }, 700);
+  }, [items.length, loading]);
+
+  const onRefresh = useCallback(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setItems(ALL_ITEMS.slice(0, 12));
+      setPage(1);
+      setLoading(false);
+    }, 700);
+  }, []);
+
   return (
     <SafeAreaView
-      className="flex-1 bg-slate-100 px-4 dark:bg-slate-950"
+      className="flex-1 px-4 bg-white"
       edges={["top", "left", "right"]}
     >
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <Text className="mt-2 text-4xl font-black text-slate-900 dark:text-white">
-          History
-        </Text>
-        <Text className="mb-5 mt-1 text-sm text-slate-500 dark:text-slate-400">
+      <View className="pt-3">
+        <Text className="text-4xl font-black text-slate-900">History</Text>
+        <Text className="mt-1 mb-3 text-sm text-slate-500">
           Track your recent activities and payment records.
         </Text>
 
-        {historyItems.map((item) => (
-          <View
-            key={`${item.title}-${item.date}`}
-            className="mb-3 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-          >
-            <View className="mb-2 flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-brand-700">
-                  <Ionicons name="time-outline" size={18} color="#ffffff" />
-                </View>
-                <Text className="text-sm font-semibold text-slate-900 dark:text-white">
-                  {item.title}
-                </Text>
-              </View>
-              <Text className="text-sm font-bold text-slate-900 dark:text-white">
-                {item.amount}
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">
-                {item.date}
-              </Text>
-              <Text
-                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.status === "Successful" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"}`}
-              >
-                {item.status}
-              </Text>
-            </View>
+        <View className="flex-row items-center mb-3">
+          <View className="flex-row items-center flex-1 px-3 py-2 bg-white border rounded-3xl border-slate-200">
+            <Ionicons name="search" size={18} color="#6b7280" />
+            <TextInput
+              placeholder="Search transactions"
+              placeholderTextColor="#9ca3af"
+              value={query}
+              onChangeText={setQuery}
+              className="flex-1 ml-3 text-sm text-slate-900"
+            />
           </View>
-        ))}
+        </View>
 
-        <View className="h-24" />
-      </ScrollView>
+        <View className="flex-row mb-4">
+          {filters.map((f) => (
+            <TouchableOpacity
+              key={f}
+              onPress={() => setFilter(f as any)}
+              className={`mr-3 px-4 py-2 rounded-full border ${filter === f ? "bg-[#1f2aba] border-[#1f2aba]" : "bg-white border-slate-200"}`}
+            >
+              <Text
+                className={`${filter === f ? "text-white" : "text-slate-700"} text-sm font-semibold`}
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <SectionList
+        style={{ backgroundColor: "#ffffff" }}
+        sections={sections}
+        keyExtractor={(item) => item.id}
+        renderSectionHeader={({ section: { title } }) => (
+          <View className="mt-1 mb-2">
+            <Text className="text-sm font-bold text-slate-700">{title}</Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => setSelectedTx(item)}>
+            <TransactionRow
+              icon={item.icon}
+              title={item.title}
+              amount={item.amount}
+              date={new Date(item.date).toLocaleString()}
+              status={item.status === "Failed" ? "Pending" : item.status}
+            />
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={{ paddingBottom: 140 }}
+        onEndReachedThreshold={0.6}
+        onEndReached={() => {
+          if (items.length < ALL_ITEMS.length) loadMore();
+        }}
+        ListEmptyComponent={() => (
+          <View className="items-center mt-20">
+            <Ionicons name="document-text-outline" size={56} color="#c7c7cc" />
+            <Text className="mt-4 text-sm text-slate-500">
+              No transactions found.
+            </Text>
+          </View>
+        )}
+        ListFooterComponent={() => (
+          <View className="items-center py-6">
+            {loading ? (
+              <ActivityIndicator size="small" color="#1f2aba" />
+            ) : null}
+          </View>
+        )}
+        onRefresh={onRefresh}
+        refreshing={loading}
+      />
+
+      <ReceiptModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
     </SafeAreaView>
   );
 }

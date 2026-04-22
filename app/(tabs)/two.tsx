@@ -1,10 +1,20 @@
 import React from 'react';
+import { type Href, useRouter } from 'expo-router';
 import { Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useFlow } from '@/providers/FlowProvider';
+
 export default function TabTwoScreen() {
+  const router = useRouter();
+  const { signOut } = useFlow();
   const [isEnabled, setIsEnabled] = React.useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace('/login' as Href);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950" edges={['left', 'right']}>
@@ -72,7 +82,10 @@ export default function TabTwoScreen() {
         </View>
 
         {/* Danger Zone */}
-        <TouchableOpacity className="bg-rose-50 dark:bg-rose-950/20 p-5 rounded-3xl items-center border border-rose-100 dark:border-rose-900/30">
+        <TouchableOpacity
+          className="bg-rose-50 dark:bg-rose-950/20 p-5 rounded-3xl items-center border border-rose-100 dark:border-rose-900/30"
+          onPress={handleLogout}
+        >
           <Text className="text-rose-600 dark:text-rose-400 font-bold">Log Out</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -1,75 +1,161 @@
-import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { Link, Tabs } from 'expo-router';
-import { Pressable, useColorScheme } from 'react-native';
-import Colors from '@/constants/Colors';
+import React from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { Text, useColorScheme, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Ionicons>['name'];
+function CustomTabIcon({
+  name,
+  label,
+  focused,
+  color,
+}: {
+  name: React.ComponentProps<typeof Ionicons>["name"];
+  label: string;
+  focused: boolean;
   color: string;
 }) {
-  return <Ionicons size={24} style={{ marginBottom: -3 }} {...props} />;
+  if (focused) {
+    return (
+      <View
+        style={{
+          width: 58,
+          height: 58,
+          borderRadius: 29,
+          alignItems: "center",
+          justifyContent: "center",
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.45)",
+          backgroundColor: "rgba(255,255,255,0.18)",
+          marginTop: -2,
+        }}
+      >
+        <Ionicons name={name} size={18} color={color} />
+        <Text style={{ color, fontSize: 10, fontWeight: "500", marginTop: 2 }}>
+          {label}
+        </Text>
+      </View>
+    );
+  }
+  return (
+    <View style={{ alignItems: "center", justifyContent: "center" }}>
+      <Ionicons
+        name={name}
+        size={18}
+        color={color}
+        style={{ marginBottom: 3 }}
+      />
+      <Text style={{ color, fontSize: 8, fontWeight: "500" }}>{label}</Text>
+    </View>
+  );
 }
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const activeColor = colorScheme === 'dark' ? '#6366f1' : '#4f46e5'; // Indigo-500/600
+  const insets = useSafeAreaInsets();
+  const tabBarBackground = "#1f2aba"; // brand deep blue
+  const activeColor = "#ffffff";
+  const inactiveColor = "rgba(255,255,255,0.75)";
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: activeColor,
-        tabBarInactiveTintColor: colorScheme === 'dark' ? '#94a3b8' : '#64748b', // Slate-400/500
+        tabBarInactiveTintColor: inactiveColor,
+        tabBarShowLabel: false,
+        tabBarItemStyle: {
+          paddingTop: 0,
+        },
         tabBarStyle: {
+          position: "absolute",
+          left: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          // make the bar shorter than full width by adding a right inset
+          right: 72,
+          bottom: Math.max(insets.bottom, 8) + 0, // add extra spacing to the bottom
           borderTopWidth: 0,
-          elevation: 0,
-          height: 60,
+          elevation: 18,
+          height: 72,
           paddingBottom: 8,
-          paddingTop: 8,
-          backgroundColor: colorScheme === 'dark' ? '#0f172a' : '#ffffff', // Slate-950/White
+          paddingTop: 18,
+          paddingLeft: 8,
+          paddingRight: 12,
+          marginRight: 31,
+          backgroundColor: tabBarBackground,
+          // Left edge flush with screen, right edge rounded to match screenshot
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 36,
+          borderBottomRightRadius: 36,
+          overflow: "visible",
+          shadowColor: "#0f172a",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.25,
+          shadowRadius: 18,
         },
-        headerStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#0f172a' : '#f8fafc', // Slate-950/Slate-50
-          elevation: 0,
-          shadowOpacity: 0,
-          borderBottomWidth: 0,
+        headerShown: false,
+        sceneStyle: {
+          backgroundColor: colorScheme === "dark" ? "#020617" : "#f3f4f8",
         },
-        headerTitleStyle: {
-          fontWeight: '800',
-          fontSize: 20,
-          color: colorScheme === 'dark' ? '#f8fafc' : '#0f172a',
-        },
-        headerShown: true,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Insights',
-          tabBarIcon: ({ color }) => <TabBarIcon name="stats-chart" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <Ionicons
-                    name="notifications-outline"
-                    size={24}
-                    color={colorScheme === 'dark' ? '#f8fafc' : '#0f172a'}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabIcon
+              name={focused ? "home" : "home-outline"}
+              label="Home"
+              color={color}
+              focused={focused}
+            />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="history"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <TabBarIcon name="settings-outline" color={color} />,
+          title: "History",
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabIcon
+              name={focused ? "time" : "time-outline"}
+              label="History"
+              color={color}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="referral"
+        options={{
+          title: "Referral",
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabIcon
+              name={focused ? "people" : "people-outline"}
+              label="Referral"
+              color={color}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <CustomTabIcon
+              name={focused ? "person" : "person-outline"}
+              label="Profile"
+              color={color}
+              focused={focused}
+            />
+          ),
         }}
       />
     </Tabs>

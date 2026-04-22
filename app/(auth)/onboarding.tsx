@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AuthButton } from "@/components/auth/AuthButton";
 import { BrandLogo } from "@/components/auth/BrandLogo";
-import { PlaceholderArt } from "@/components/auth/PlaceholderArt";
+import { OnboardingArts } from "@/components/auth/OnboardingArts";
 import { useFlow } from "@/providers/FlowProvider";
 
 type Slide = {
@@ -72,10 +72,7 @@ export default function OnboardingScreen() {
         <BrandLogo />
 
         <View className="items-center mt-6">
-          <PlaceholderArt
-            iconName={slide.iconName}
-            caption="Illustration placeholder"
-          />
+          <OnboardingArts iconName={slide.iconName} caption="" />
         </View>
 
         <Text className="mt-10 text-center text-[44px] font-bold leading-[52px] text-black">

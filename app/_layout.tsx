@@ -70,14 +70,13 @@ function RootLayoutNav() {
         <Stack.Screen name="(electricity)" options={{ headerShown: false }} />
         <Stack.Screen name="(exams)" options={{ headerShown: false }} />
         <Stack.Screen name="(bulk-sms)" options={{ headerShown: false }} />
-        <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
-        <Stack.Screen name="(referral)" options={{ headerShown: false }} />
-        <Stack.Screen name="(settings)" options={{ headerShown: false }} />
         <Stack.Screen name="(upgrade)" options={{ headerShown: false }} />
         <Stack.Screen name="(market)" options={{ headerShown: false }} />
         <Stack.Screen name="(spin)" options={{ headerShown: false }} />
         <Stack.Screen name="(withdrawal)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen name="(bonus)" options={{ headerShown: false }} />
+        <Stack.Screen name="(funding)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

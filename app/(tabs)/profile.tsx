@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useFlow } from "@/providers/FlowProvider";
+import { useRouter } from "expo-router";
 
 const profileOptions = [
   {
@@ -40,6 +42,14 @@ const profileOptions = [
 ];
 
 export default function ProfileScreen() {
+  const { signOut } = useFlow();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace("/login");
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar style="dark" />
@@ -112,7 +122,10 @@ export default function ProfileScreen() {
 
         {/* Log Out Button */}
         <View className="px-5 mt-10 mb-32">
-          <TouchableOpacity className="items-center justify-center py-4 bg-brand-700 rounded-2xl">
+          <TouchableOpacity 
+            className="items-center justify-center py-4 bg-brand-700 rounded-2xl"
+            onPress={handleLogout}
+          >
             <Text className="text-lg font-bold text-white">Log Out</Text>
           </TouchableOpacity>
         </View>

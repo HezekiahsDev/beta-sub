@@ -15,8 +15,8 @@ const quickActions: Array<{
   label: string;
   route?: any;
 }> = [
-  { icon: "rocket-outline", label: "Bonus" },
-  { icon: "add", label: "Add Money" },
+  { icon: "rocket-outline", label: "Bonus", route: "/(bonus)" },
+  { icon: "add", label: "Add Money", route: "/(funding)" },
   { icon: "tennisball-outline", label: "Spin & Win", route: "/(spin)" },
   { icon: "wallet-outline", label: "Wallet to Bank", route: "/(withdrawal)" },
 ];
@@ -92,9 +92,11 @@ export default function TabOneScreen() {
           <View className="flex-row items-start justify-between">
             <View>
               <Text className="text-brand-200">Wallet Balance</Text>
-              <Text className="text-5xl font-bold text-white">₦0.00</Text>
+              <Text className="text-5xl font-bold text-white">
+                ₦9,768,343.21
+              </Text>
               <Text className="text-lg font-medium text-brand-200">
-                Bonus ₦0
+                Bonus ₦398,563.08
               </Text>
             </View>
 

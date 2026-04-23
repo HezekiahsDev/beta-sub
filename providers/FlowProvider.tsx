@@ -25,15 +25,17 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
 
     async function hydrateFlow() {
       try {
-        const onboardingValue = await storage.getItem(ONBOARDING_KEY);
-        const authValue = await storage.getItem(AUTH_KEY);
+        const [onboardingValue, authValue] = await Promise.all([
+          storage.getItem(ONBOARDING_KEY),
+          storage.getItem(AUTH_KEY),
+        ]);
 
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) return;
 
         setOnboardingComplete(onboardingValue === 'true');
         setIsAuthenticated(authValue === 'true');
+      } catch (error) {
+        console.error('Failed to hydrate flow state:', error);
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -63,7 +65,7 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
       },
       signOut: async () => {
         setIsAuthenticated(false);
-        await storage.setItem(AUTH_KEY, 'false');
+        await storage.removeItem(AUTH_KEY);
       },
     }),
     [isReady, onboardingComplete, isAuthenticated]

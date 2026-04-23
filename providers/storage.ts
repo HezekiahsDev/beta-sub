@@ -1,14 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const memory = new Map<string, string>();
-
 async function getItem(key: string): Promise<string | null> {
   try {
-    const val = await AsyncStorage.getItem(key);
-    return val;
+    return await AsyncStorage.getItem(key);
   } catch (e) {
-    // Native module not available (Expo Go), fall back to memory
-    return memory.has(key) ? (memory.get(key) as string) : null;
+    console.error(`Error reading from storage: ${key}`, e);
+    return null;
   }
 }
 
@@ -16,7 +13,7 @@ async function setItem(key: string, value: string): Promise<void> {
   try {
     await AsyncStorage.setItem(key, value);
   } catch (e) {
-    memory.set(key, value);
+    console.error(`Error saving to storage: ${key}`, e);
   }
 }
 
@@ -24,7 +21,7 @@ async function removeItem(key: string): Promise<void> {
   try {
     await AsyncStorage.removeItem(key);
   } catch (e) {
-    memory.delete(key);
+    console.error(`Error removing from storage: ${key}`, e);
   }
 }
 

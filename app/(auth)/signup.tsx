@@ -1,23 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
-import { type Href, useRouter } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
+import { type Href, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Pressable,
-  Text,
-  TextInput,
-  View,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
-  Keyboard,
+  Text,
+  TextInput,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { BrandLogo } from "@/components/auth/BrandLogo";
+import { endpoints } from "@/lib/api";
 import { validateSignUp } from "@/lib/validation";
 
 export default function SignUpScreen() {
@@ -33,6 +34,8 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const errors = useMemo(
     () =>
@@ -49,12 +52,49 @@ export default function SignUpScreen() {
 
   const canSubmit = Object.keys(errors).length === 0;
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     setSubmitted(true);
+    setApiError("");
     if (!canSubmit) {
       return;
     }
-    router.push("/pin" as Href);
+
+    setLoading(true);
+    try {
+      const payload = {
+        PhoneNumber: phone,
+        Password: password,
+        ConfirmPassword: confirmPassword,
+        FullName: name,
+        Email: email,
+        Referral: agentCode,
+      };
+
+      const response = await fetch(endpoints.register, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await response.text();
+      let parseResult;
+      try {
+        parseResult = JSON.parse(responseText);
+      } catch (e) {}
+
+      if (!response.ok || (parseResult && parseResult.status === "error")) {
+        setApiError(parseResult?.message || "Registration failed");
+        return;
+      }
+
+      router.push("/pin" as Href);
+    } catch (error) {
+      setApiError("A network error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -210,11 +250,17 @@ export default function SignUpScreen() {
                 </Text>
               ) : null}
 
+              {apiError ? (
+                <Text className="mb-4 text-lg text-center text-rose-600">
+                  {apiError}
+                </Text>
+              ) : null}
+
               <View className="mt-auto">
                 <AuthButton
-                  label="Continue"
+                  label={loading ? "Creating account..." : "Continue"}
                   onPress={onSubmit}
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || loading}
                 />
               </View>
             </View>

@@ -1,9 +1,13 @@
-import React from "react";
+import AccountsList from "@/components/dashboard/AccountsList";
+import SlideCarousel from "@/components/dashboard/SlideCarousel";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useFlow } from "@/providers/FlowProvider";
 
 import { ActionChip } from "@/components/dashboard/ActionChip";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
@@ -43,6 +47,7 @@ const services: Array<{
 
 export default function TabOneScreen() {
   const router = useRouter();
+  const { user } = useFlow();
 
   return (
     <SafeAreaView
@@ -60,7 +65,7 @@ export default function TabOneScreen() {
               <View>
                 <Text className="text-xs text-brand-200">Welcome Back!</Text>
                 <Text className="text-2xl font-black text-white">
-                  Hezekiahs
+                  {user?.Name ?? "Hezekiahs"}
                 </Text>
               </View>
             </View>
@@ -83,20 +88,26 @@ export default function TabOneScreen() {
             </View>
           </View>
 
-          <View className="p-2 mb-4 border rounded-xl border-white/20 bg-white/5">
-            <Text className="text-sm text-brand-100">
-              Welcome to Betasub enjoy great discount on all your purchases
-            </Text>
-          </View>
+          {user?.Notification ? (
+            <View className="p-2 mb-4 border rounded-xl border-white/20 bg-white/5">
+              <Text className="text-sm text-brand-100">
+                {user.Notification}
+              </Text>
+            </View>
+          ) : null}
+
+          {user?.SlideImage?.length ? (
+            <SlideCarousel slides={user.SlideImage} />
+          ) : null}
 
           <View className="flex-row items-start justify-between">
             <View>
               <Text className="text-brand-200">Wallet Balance</Text>
               <Text className="text-5xl font-bold text-white">
-                ₦9,768,343.21
+                ₦{user?.WalletBalance ?? "0.00"}
               </Text>
               <Text className="text-lg font-medium text-brand-200">
-                Bonus ₦398,563.08
+                Bonus ₦{user?.Bonus ?? "0"}
               </Text>
             </View>
 
@@ -116,6 +127,10 @@ export default function TabOneScreen() {
           <View className="items-center mt-2">
             <Ionicons name="chevron-down" size={24} color="#dbe4ff" />
           </View>
+
+          {user?.Account?.length ? (
+            <AccountsList accounts={user.Account} />
+          ) : null}
         </View>
 
         <View className="-mt-6 rounded-t-[28px] bg-white px-4 pt-6 shadow-md">

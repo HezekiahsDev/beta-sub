@@ -2,45 +2,92 @@ import { Ionicons } from "@expo/vector-icons";
 import { type Href, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Pressable,
-  Text,
-  View,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
-  Keyboard,
+  Text,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AuthButton } from "@/components/auth/AuthButton";
 import { AuthInput } from "@/components/auth/AuthInput";
 import { BrandLogo } from "@/components/auth/BrandLogo";
+import { endpoints } from "@/lib/api";
 import { validateLogin } from "@/lib/validation";
 import { useFlow } from "@/providers/FlowProvider";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { signIn } = useFlow();
-  const [username, setUsername] = useState("");
+  const [PhoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const errors = useMemo(
-    () => validateLogin({ username, password }),
-    [username, password],
+    () => validateLogin({ PhoneNumber, password }),
+    [PhoneNumber, password],
   );
   const canSubmit = Object.keys(errors).length === 0;
 
   const onSubmit = async () => {
     setSubmitted(true);
+    setApiError("");
     if (!canSubmit) {
       return;
     }
-    await signIn();
-    router.replace("/(tabs)");
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("PhoneNumber", PhoneNumber);
+      formData.append("Password", password);
+
+      const response = await fetch(endpoints.login, {
+        method: "POST",
+        body: formData, // the prompt says Form Data (NOT JSON)
+      });
+
+      const responseText = await response.text();
+      let parseResult;
+      try {
+        parseResult = JSON.parse(responseText);
+      } catch (e) {
+        // If not JSON, maybe a plain string error or something else
+      }
+
+      if (!response.ok || (parseResult && parseResult.status === "error")) {
+        setApiError(parseResult?.message || "Login failed");
+        return;
+      }
+
+      // The API returns `ApiToken` and a full user payload. Prefer that.
+      const token =
+        parseResult?.ApiToken ||
+        parseResult?.token ||
+        parseResult?.access_token ||
+        parseResult?.AccessToken;
+
+      if (token) {
+        // Pass the full parsed response so the flow provider can set user
+        // immediately and then refresh details in the background.
+        await signIn(token, parseResult);
+        router.replace("/(tabs)");
+      } else {
+        setApiError("Authentication failed: No token received.");
+      }
+    } catch (error) {
+      setApiError("A network error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,12 +111,12 @@ export default function LoginScreen() {
               </View>
 
               <AuthInput
-                label="Username or email"
-                value={username}
-                onChangeText={setUsername}
-                placeholder="Username or email"
+                label="PhoneNumber or email"
+                value={PhoneNumber}
+                onChangeText={setPhoneNumber}
+                placeholder="PhoneNumber or email"
                 autoCapitalize="words"
-                error={submitted ? errors.username : undefined}
+                error={submitted ? errors.PhoneNumber : undefined}
               />
 
               <AuthInput
@@ -114,11 +161,17 @@ export default function LoginScreen() {
                 </Pressable>
               </View>
 
+              {apiError ? (
+                <Text className="mt-4 text-lg text-center text-rose-600">
+                  {apiError}
+                </Text>
+              ) : null}
+
               <View className="mt-10">
                 <AuthButton
-                  label="Log In"
+                  label={loading ? "Logging in..." : "Log In"}
                   onPress={onSubmit}
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || loading}
                 />
               </View>
 

@@ -1,5 +1,5 @@
 export type LoginValues = {
-  username: string;
+  PhoneNumber: string;
   password: string;
 };
 
@@ -15,8 +15,8 @@ export type SignUpValues = {
 export function validateLogin(values: LoginValues) {
   const errors: Partial<Record<keyof LoginValues, string>> = {};
 
-  if (!values.username.trim()) {
-    errors.username = "Username is required.";
+  if (!values.PhoneNumber.trim()) {
+    errors.PhoneNumber = "PhoneNumber is required.";
   }
 
   if (!values.password) {
